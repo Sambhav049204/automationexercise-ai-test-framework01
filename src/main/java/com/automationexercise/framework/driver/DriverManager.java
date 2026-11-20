@@ -37,6 +37,11 @@ public final class DriverManager {
         return driver;
     }
 
+        /** True if the current thread has an active driver. Lets listeners avoid exceptions. */
+    public static boolean hasDriver() {
+        return DRIVER.get() != null;
+    }
+
     public static void quitDriver() {
         WebDriver driver = DRIVER.get();
         if (driver == null) {
