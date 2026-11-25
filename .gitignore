@@ -35,6 +35,7 @@ logs/
 # ===== AI working files (raw prompts/responses may contain sensitive data) =====
 ai-output/
 
+
 # ===== OS files =====
 Thumbs.db
 Desktop.ini
