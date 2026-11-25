@@ -62,4 +62,8 @@ public final class WaitUtils {
         wait.until(d -> "complete".equals(
                 ((JavascriptExecutor) d).executeScript("return document.readyState")));
     }
+
+    public void waitForNonBlankTitle() {
+        wait.until(d -> d.getTitle() != null && !d.getTitle().isBlank());
+    }
 }
