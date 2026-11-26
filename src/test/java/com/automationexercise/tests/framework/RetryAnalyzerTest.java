@@ -40,4 +40,14 @@ public class RetryAnalyzerTest {
     public void shouldNotRetryWhenThereIsNoFailure() {
         assertFalse(RetryAnalyzer.shouldRetry(null, 0, 3));
     }
+
+        @Test
+    public void shouldRetryAssertionFailureWhenSiteIsOverloaded() {
+        assertTrue(RetryAnalyzer.shouldRetry(new AssertionError("page never loaded"), 0, 2, true));
+    }
+
+    @Test
+    public void shouldStopRetryingOverloadedSiteWhenLimitIsReached() {
+        assertFalse(RetryAnalyzer.shouldRetry(new AssertionError("page never loaded"), 2, 2, true));
+    }
 }

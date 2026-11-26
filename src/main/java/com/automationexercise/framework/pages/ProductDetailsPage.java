@@ -15,6 +15,9 @@ public class ProductDetailsPage extends BasePage {
     private static final By QUANTITY = By.id("quantity");
     private static final By ADD_TO_CART = By.cssSelector("button.cart");
     private static final By ADDED_MODAL_TITLE = By.cssSelector(".modal-title");
+    // The "View Cart" link inside the confirmation (the top navigation also links to /view_cart)
+    private static final By VIEW_CART_IN_CONFIRMATION =
+            By.xpath("//div[contains(@class,'modal-body')]//a[@href='/view_cart']");
     private static final By REVIEW_NAME = By.cssSelector("#review-form #name");
     private static final By REVIEW_EMAIL = By.cssSelector("#review-form #email");
     private static final By REVIEW_TEXT = By.id("review");
@@ -66,6 +69,14 @@ public class ProductDetailsPage extends BasePage {
 
     public String addedConfirmationTitle() {
         return getText(ADDED_MODAL_TITLE);
+    }
+
+    /** Clicks "View Cart" in the confirmation and returns the cart page. */
+    public CartPage openCartFromConfirmation() {
+        click(VIEW_CART_IN_CONFIRMATION);
+        waits.waitForUrlContains("/view_cart");
+        waitForPageLoad();
+        return new CartPage(driver);
     }
 
     public boolean isReviewFormDisplayed() {

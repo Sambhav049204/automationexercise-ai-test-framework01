@@ -66,4 +66,8 @@ public final class WaitUtils {
     public void waitForNonBlankTitle() {
         wait.until(d -> d.getTitle() != null && !d.getTitle().isBlank());
     }
+
+        public boolean waitForUrlChange(String previousUrl) {
+        return wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(previousUrl)));
+    }
 }
