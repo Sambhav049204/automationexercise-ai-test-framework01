@@ -8,6 +8,7 @@ import com.automationexercise.framework.utils.XPaths;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /** The "ALL PRODUCTS" page (/products), including product search. */
 public class ProductsPage extends BasePage {
@@ -18,6 +19,10 @@ public class ProductsPage extends BasePage {
     private static final By SEARCH_BUTTON = By.id("submit_search");
     // Official test case 9 names the heading "SEARCHED PRODUCTS"
     private static final By SEARCH_RESULTS_HEADING = XPaths.containingText("searched products");
+
+    // Observed: every product sits in div.product-image-wrapper; brand counts are spans like "(6)"
+    private static final By PRODUCT_CARDS = By.cssSelector("div.product-image-wrapper");
+    private static final By BRAND_COUNTS = By.cssSelector("ul.nav.nav-pills.nav-stacked a span.pull-right");
 
     public ProductsPage(WebDriver driver) {
         super(driver);
@@ -58,5 +63,19 @@ public class ProductsPage extends BasePage {
         } catch (TimeoutException e) {
             return false;
         }
+    }
+
+    /** Number of product cards currently listed (immediate, does not wait). */
+    public int productCount() {
+        return findAll(PRODUCT_CARDS).size();
+    }
+
+    /** Sum of the counts shown next to each brand, for example (6) + (5) + ... */
+    public int brandProductTotal() {
+        int total = 0;
+        for (WebElement count : findAll(BRAND_COUNTS)) {
+            total += Integer.parseInt(count.getText().replaceAll("[^0-9]", ""));
+        }
+        return total;
     }
 }

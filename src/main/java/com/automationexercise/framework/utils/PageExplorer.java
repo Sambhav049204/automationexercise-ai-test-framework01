@@ -54,7 +54,7 @@ public final class PageExplorer {
             """;
 
     private static final String ELEMENTS_SCRIPT = HELPERS + """
-            const selector = 'a[href], button, input, select, textarea, form, h1, h2, h3, h4, [data-qa]';
+            const selector = 'a, button, input, select, textarea, form, h1, h2, h3, h4, [data-qa]';
             return Array.from(document.querySelectorAll(selector)).slice(0, 600).map(function (e) {
               const cls = (typeof e.className === 'string' ? e.className : '').trim().replace(/\\s+/g, ' ');
               return {

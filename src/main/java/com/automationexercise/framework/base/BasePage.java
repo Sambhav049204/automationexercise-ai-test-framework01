@@ -12,6 +12,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * Parent of all page objects. Provides waiting, logging and safe element actions.
@@ -37,11 +38,36 @@ public abstract class BasePage {
     }
 
     /** Opens base.url plus the given path, e.g. openPath("/login"). */
+        /** Opens base.url plus the given path, e.g. openPath("/login"). */
     protected void openPath(String path) {
         String base = ConfigReader.get("base.url");
         String normalizedBase = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
         String normalizedPath = path.startsWith("/") ? path : "/" + path;
         open(normalizedBase + normalizedPath);
+        awaitApplicationPage();
+    }
+
+    private static final int MAX_LOAD_ATTEMPTS = 3;
+
+    /**
+     * The site sometimes answers "heavy load (queue full)" with an empty page title.
+     * Reload until a real page appears, and fail with a clear message if it never does.
+     */
+    private void awaitApplicationPage() {
+        for (int attempt = 1; attempt <= MAX_LOAD_ATTEMPTS; attempt++) {
+            try {
+                waits.waitForNonBlankTitle();
+                return;
+            } catch (TimeoutException e) {
+                log.warn("Page not ready (attempt {} of {}): {}", attempt, MAX_LOAD_ATTEMPTS, driver.getCurrentUrl());
+                if (attempt == MAX_LOAD_ATTEMPTS) {
+                    throw new IllegalStateException(
+                            "The site kept answering with an error page: " + driver.getCurrentUrl(), e);
+                }
+                driver.navigate().refresh();
+                waits.waitForPageLoad();
+            }
+        }
     }
 
     public String getTitle() {

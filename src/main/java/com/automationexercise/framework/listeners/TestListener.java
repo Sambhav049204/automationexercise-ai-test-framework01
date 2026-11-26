@@ -3,6 +3,7 @@ package com.automationexercise.framework.listeners;
 import com.automationexercise.framework.config.ConfigReader;
 import com.automationexercise.framework.driver.DriverManager;
 import com.automationexercise.framework.utils.ScreenshotUtils;
+import com.automationexercise.framework.utils.SiteHealth;
 import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +19,10 @@ public class TestListener implements ITestListener {
     @Override
     public void onTestFailure(ITestResult result) {
         String name = displayName(result);
-        LOG.error("FAILED {}", name, result.getThrowable());
+        String category = DriverManager.hasDriver() && SiteHealth.isOverloaded(DriverManager.getDriver())
+                ? "ENVIRONMENT (site overloaded)"
+                : "UNCLASSIFIED";
+        LOG.error("FAILED {} [{}]", name, category, result.getThrowable());
 
         if (ConfigReader.getBoolean("screenshot.on.failure") && DriverManager.hasDriver()) {
             try {

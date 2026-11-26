@@ -1,6 +1,8 @@
 package com.automationexercise.framework.listeners;
 
 import com.automationexercise.framework.config.ConfigReader;
+import com.automationexercise.framework.driver.DriverManager;
+import com.automationexercise.framework.utils.SiteHealth;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,8 +13,8 @@ import org.testng.IRetryAnalyzer;
 import org.testng.ITestResult;
 
 /**
- * Retries a failed test only when the failure looks transient (flaky UI timing),
- * never for assertion failures, and at most {@code retry.count} times.
+ * Retries a failed test only when the failure looks transient (flaky UI timing) or the site is showing
+ * its overload page, never for ordinary assertion failures, and at most {@code retry.count} times.
  */
 public class RetryAnalyzer implements IRetryAnalyzer {
 
@@ -30,10 +32,15 @@ public class RetryAnalyzer implements IRetryAnalyzer {
     public boolean retry(ITestResult result) {
         int maxRetries = ConfigReader.getInt("retry.count");
         Throwable failure = result.getThrowable();
-        if (shouldRetry(failure, attempts, maxRetries)) {
+        // The browser is still open here: TestNG asks before running @AfterMethod
+        boolean siteOverloaded = DriverManager.hasDriver() && SiteHealth.isOverloaded(DriverManager.getDriver());
+
+        if (shouldRetry(failure, attempts, maxRetries, siteOverloaded)) {
             attempts++;
-            LOG.warn("Retrying {} (retry {} of {}) after transient failure: {}",
-                    result.getMethod().getMethodName(), attempts, maxRetries, failure);
+            LOG.warn("Retrying {} (retry {} of {}) {}: {}",
+                    result.getMethod().getMethodName(), attempts, maxRetries,
+                    siteOverloaded ? "because the site is overloaded (queue full)" : "after transient failure",
+                    failure);
             return true;
         }
         return false;
@@ -41,7 +48,11 @@ public class RetryAnalyzer implements IRetryAnalyzer {
 
     /** Pure decision logic, kept static so it can be unit tested without a browser. */
     public static boolean shouldRetry(Throwable failure, int attemptsSoFar, int maxRetries) {
-        return attemptsSoFar < maxRetries && isTransient(failure);
+        return shouldRetry(failure, attemptsSoFar, maxRetries, false);
+    }
+
+    public static boolean shouldRetry(Throwable failure, int attemptsSoFar, int maxRetries, boolean siteOverloaded) {
+        return attemptsSoFar < maxRetries && (siteOverloaded || isTransient(failure));
     }
 
     /** True if the failure, or any of its causes, is a known transient Selenium problem. */

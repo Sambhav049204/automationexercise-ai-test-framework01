@@ -33,4 +33,12 @@ public class XPathsTest extends BaseTest {
         assertEquals(getDriver().findElements(XPaths.containingText("no such text")).size(), 0);
         expectThrows(IllegalArgumentException.class, () -> XPaths.containingText("it's"));
     }
+
+        @Test
+    public void containingTextShouldIgnoreThePageTitle() {
+        getDriver().get(TestPages.dataUrl(
+                "<html><head><title>Account Created</title></head><body><p>Hello</p></body></html>"));
+
+        assertEquals(getDriver().findElements(XPaths.containingText("account created")).size(), 0);
+    }
 }

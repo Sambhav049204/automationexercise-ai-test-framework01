@@ -21,7 +21,7 @@ public final class XPaths {
 
     /** Any element whose own text contains the text, ignoring case. */
     public static By containingText(String text) {
-        return By.xpath("//*[not(self::script) and not(self::style) and contains(translate(text(),'"
+        return By.xpath("//body//*[not(self::script) and not(self::style) and contains(translate(text(),'"
                 + UPPER + "','" + LOWER + "'),'" + checked(text).toLowerCase(Locale.ROOT) + "')]");
     }
 

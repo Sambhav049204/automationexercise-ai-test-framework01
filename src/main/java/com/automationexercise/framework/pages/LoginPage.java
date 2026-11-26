@@ -4,6 +4,7 @@ import com.automationexercise.framework.base.BasePage;
 import com.automationexercise.framework.components.HeaderComponent;
 import com.automationexercise.framework.components.SubscriptionComponent;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 /** The "Login to your account" / "New User Signup!" page (/login). */
@@ -20,6 +21,10 @@ public class LoginPage extends BasePage {
     // Heading texts observed on the page
     private static final By LOGIN_HEADING = By.xpath("//h2[normalize-space()='Login to your account']");
     private static final By SIGNUP_HEADING = By.xpath("//h2[normalize-space()='New User Signup!']");
+
+    // Message observed after a failed login: a plain <p> inside the login form
+    private static final By LOGIN_ERROR =
+            By.xpath("//p[normalize-space()='Your email or password is incorrect!']");
 
     public LoginPage(WebDriver driver) {
         super(driver);
@@ -65,5 +70,19 @@ public class LoginPage extends BasePage {
         type(SIGNUP_NAME, name);
         type(SIGNUP_EMAIL, email);
         click(SIGNUP_BUTTON);
+    }
+
+    /** Waits briefly for the "incorrect" message that follows a failed login. */
+    public boolean isLoginErrorVisible() {
+        try {
+            waits.waitForVisible(LOGIN_ERROR);
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
+    public String loginErrorText() {
+        return getText(LOGIN_ERROR);
     }
 }
